@@ -21,7 +21,6 @@ import {
 import "tui-calendar/dist/tui-calendar.css";
 import "tui-date-picker/dist/tui-date-picker.css";
 import "tui-time-picker/dist/tui-time-picker.css";
-import { Windows } from "grommet-icons";
 
 export const Calendario = () => {
   const [show, setShow] = useState(false);
@@ -116,7 +115,7 @@ export const Calendario = () => {
     "common.dayname.color": "#333",
   };
 
-  const WeekCalendar = new Calendar("#calendar", {
+  let WeekCalendar = new Calendar("#calendar", {
     theme: COMMON_CUSTOM_THEME,
     defaultView: "week",
     taskView: false,
@@ -146,7 +145,14 @@ export const Calendario = () => {
     },
     beforeCreateSchedule: function (e) {
       setShow(true);
-      setStartHour(moment(e.end.getDate()).toDate());
+
+      setStartHour(
+        moment({
+          day: e.start.getDay() + 2,
+          hours: e.start.getHours(),
+          minutes: e.start.getMinutes(),
+        }).toDate()
+      );
       setSelectedDay(e.start.getDay() + 2);
       /*const title = prompt("Schedule", "@suvrity's birthday");
       var schedule = {
@@ -160,8 +166,8 @@ export const Calendario = () => {
       /* step2. save schedule */
       //WeekCalendar.createSchedules([schedule]);
       /* step3. clear guide element */
-      e.guide.clearGuideElement();
-      console.log("beforeCreateSchedule", e);
+      // e.guide.clearGuideElement();
+      //console.log("beforeCreateSchedule", e);
       // open a creation popu
     },
     beforeUpdateSchedule: function (e) {
@@ -191,6 +197,7 @@ export const Calendario = () => {
     const minutos = parseInt(tiempos[1], 10);
     //const dia = moment(selectedDay).day();
     moment({ day: selectedDay, hour: hora, minutes: minutos }).toDate();
+
     setIdc(idc + 1);
     const newSchedule = {
       id: idc + "",
@@ -211,119 +218,118 @@ export const Calendario = () => {
       isReadOnly: true,
     };
     setSchedule([...schedule, newSchedule]);
-    //window.location.reload();
+    //console.log(WeekCalendar.getSchedule());
+    WeekCalendar.createSchedules(schedule);
   };
 
   return (
     <>
-      <div id="WeekCalendar">
-        <Box align="start">
-          {show && (
-            <Layer
-              onEsc={() => setShow(false)}
-              onClickOutside={() => setShow(false)}
-            >
-              <Card background="light-1">
-                <CardHeader
-                  pad={{ horizontal: "medium" }}
-                  margin={{ top: "1rem" }}
+      <Box align="start">
+        {show && (
+          <Layer
+            onEsc={() => setShow(false)}
+            onClickOutside={() => setShow(false)}
+          >
+            <Card background="light-1">
+              <CardHeader
+                pad={{ horizontal: "medium" }}
+                margin={{ top: "1rem" }}
+              >
+                <Grid
+                  rows={["xxsmall", "xxsmall"]}
+                  columns={["10rem", "10rem"]}
+                  gap="small"
+                  areas={[
+                    { name: "header", start: [0, 0], end: [1, 0] },
+                    { name: "nav", start: [0, 1], end: [1, 1] },
+                  ]}
                 >
-                  <Grid
-                    rows={["xxsmall", "xxsmall"]}
-                    columns={["10rem", "10rem"]}
-                    gap="small"
-                    areas={[
-                      { name: "header", start: [0, 0], end: [1, 0] },
-                      { name: "nav", start: [0, 1], end: [1, 1] },
-                    ]}
-                  >
-                    <Box gridArea="header" background="light-2">
-                      <TextInput value={nombre}></TextInput>
-                    </Box>
-                    <Box gridArea="nav" background="light-2">
-                      <TextArea
-                        resize={false}
-                        placeholder="Ingrese sus requerimientos"
-                        value={req}
-                        onChange={(e) => {
-                          setReq(e.target.value);
-                        }}
-                      ></TextArea>
-                    </Box>
-                  </Grid>
-                </CardHeader>
+                  <Box gridArea="header" background="light-2">
+                    <TextInput value={nombre}></TextInput>
+                  </Box>
+                  <Box gridArea="nav" background="light-2">
+                    <TextArea
+                      resize={false}
+                      placeholder="Ingrese sus requerimientos"
+                      value={req}
+                      onChange={(e) => {
+                        setReq(e.target.value);
+                      }}
+                    ></TextArea>
+                  </Box>
+                </Grid>
+              </CardHeader>
 
-                <CardBody
-                  pad="medium"
-                  margin={{ top: "xxsmall", bottom: "2rem" }}
+              <CardBody
+                pad="medium"
+                margin={{ top: "xxsmall", bottom: "2rem" }}
+              >
+                <Grid
+                  rows={["xsmall", "xsmall"]}
+                  columns={["10rem", "10rem"]}
+                  gap="small"
+                  areas={[
+                    { name: "nav", start: [0, 0], end: [0, 0] },
+                    { name: "main", start: [1, 0], end: [1, 0] },
+                    { name: "hh", start: [0, 1], end: [1, 1] },
+                  ]}
                 >
-                  <Grid
-                    rows={["xsmall", "xsmall"]}
-                    columns={["10rem", "10rem"]}
-                    gap="small"
-                    areas={[
-                      { name: "nav", start: [0, 0], end: [0, 0] },
-                      { name: "main", start: [1, 0], end: [1, 0] },
-                      { name: "hh", start: [0, 1], end: [1, 1] },
-                    ]}
-                  >
-                    <Box gridArea="nav" background="light-2">
-                      <Text>Desde</Text>
-                      <DateInput
-                        format="dd/mm/yyyy"
-                        value={today}
-                        onChange={handleTodayDate}
-                        inline={false}
-                      />
-                    </Box>
-                    <Box gridArea="main" background="light-2">
-                      <Text>Hasta</Text>
-                      <DateInput
-                        format="dd/mm/yyyy"
-                        value={moment().add(1, "week").toDate().toISOString()}
-                        onChange={({ value }) => {}}
-                        inline={false}
-                      />
-                    </Box>
-                    <Box gridArea="hh" background="light-2">
-                      <Text>Hasta</Text>
-                      <MaskedInput
-                        mask={[
-                          {
-                            length: [1, 2],
-                            options: [
-                              "9:30",
-                              "10:40",
-                              "11:50",
-                              "13:00",
-                              "14:10",
-                              "15:20",
-                              "16:30",
-                              "17:40",
-                              "18:50",
-                              "20:00",
-                            ],
-                            regexp: /^1[1-2]$|^[0-9]$/,
-                          },
-                        ]}
-                        value={time}
-                        onChange={(event) => {
-                          setTime(event.target.value);
-                        }}
-                      />
-                      <br></br>
-                      <Button
-                        label="Confirmar reserva"
-                        onClick={handleAddSchedule}
-                      />
-                    </Box>
-                  </Grid>
-                </CardBody>
-              </Card>
-            </Layer>
-          )}
-        </Box>
-      </div>
+                  <Box gridArea="nav" background="light-2">
+                    <Text>Desde</Text>
+                    <DateInput
+                      format="dd/mm/yyyy"
+                      value={today}
+                      onChange={handleTodayDate}
+                      inline={false}
+                    />
+                  </Box>
+                  <Box gridArea="main" background="light-2">
+                    <Text>Hasta</Text>
+                    <DateInput
+                      format="dd/mm/yyyy"
+                      value={moment().add(1, "week").toDate().toISOString()}
+                      onChange={({ value }) => {}}
+                      inline={false}
+                    />
+                  </Box>
+                  <Box gridArea="hh" background="light-2">
+                    <Text>Hasta</Text>
+                    <MaskedInput
+                      mask={[
+                        {
+                          length: [1, 2],
+                          options: [
+                            "9:30",
+                            "10:40",
+                            "11:50",
+                            "13:00",
+                            "14:10",
+                            "15:20",
+                            "16:30",
+                            "17:40",
+                            "18:50",
+                            "20:00",
+                          ],
+                          regexp: /^1[1-2]$|^[0-9]$/,
+                        },
+                      ]}
+                      value={time}
+                      onChange={(event) => {
+                        setTime(event.target.value);
+                      }}
+                    />
+                    <br></br>
+                    <Button
+                      label="Confirmar reserva"
+                      onClick={handleAddSchedule}
+                    />
+                  </Box>
+                </Grid>
+              </CardBody>
+            </Card>
+          </Layer>
+        )}
+      </Box>
     </>
   );
 };
